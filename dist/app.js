@@ -73,7 +73,7 @@ function validate(validatableInput) {
     }
     return isValid;
 }
-function autobind(_, _2, descriptor) {
+function Autobind(_, _2, descriptor) {
     const originalMethod = descriptor.value;
     const adjDescriptor = {
         configurable: true,
@@ -114,13 +114,25 @@ class ProjectItem extends Component {
             return `${this.project.people} persons`;
         }
     }
-    configure() { }
+    dragStartHandler(event) {
+        console.log(event);
+    }
+    dragEndHandler(_) {
+        console.log("drag end");
+    }
+    configure() {
+        this.element.addEventListener("dragstart", this.dragStartHandler);
+        this.element.addEventListener("dragend", this.dragEndHandler);
+    }
     renderContent() {
         this.element.querySelector("h2").textContent = this.project.title;
         this.element.querySelector("h3").textContent = this.persons + " assigned";
         this.element.querySelector("p").textContent = this.project.description;
     }
 }
+__decorate([
+    Autobind
+], ProjectItem.prototype, "dragStartHandler", null);
 class ProjectList extends Component {
     constructor(type) {
         super("project-list", "app", false, `${type}-projects`);
@@ -212,7 +224,7 @@ class ProjectInput extends Component {
     }
 }
 __decorate([
-    autobind
+    Autobind
 ], ProjectInput.prototype, "submitHandler", null);
 const prjInput = new ProjectInput();
 const activePrjList = new ProjectList("active");
