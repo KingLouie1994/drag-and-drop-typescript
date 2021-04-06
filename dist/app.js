@@ -73,7 +73,7 @@ function validate(validatableInput) {
     }
     return isValid;
 }
-function Autobind(_target, _methodName, descriptor) {
+function autobind(_, _2, descriptor) {
     const originalMethod = descriptor.value;
     const adjDescriptor = {
         configurable: true,
@@ -103,11 +103,21 @@ class ProjectItem extends Component {
     constructor(hostId, project) {
         super("single-project", hostId, false, project.id);
         this.project = project;
+        this.configure();
+        this.renderContent();
+    }
+    get persons() {
+        if (this.project.people === 1) {
+            return "1 person";
+        }
+        else {
+            return `${this.project.people} persons`;
+        }
     }
     configure() { }
     renderContent() {
         this.element.querySelector("h2").textContent = this.project.title;
-        this.element.querySelector("h3").textContent = `Project contains ${this.project.people.toString()} people`;
+        this.element.querySelector("h3").textContent = this.persons + " assigned";
         this.element.querySelector("p").textContent = this.project.description;
     }
 }
@@ -116,6 +126,10 @@ class ProjectList extends Component {
         super("project-list", "app", false, `${type}-projects`);
         this.type = type;
         this.assignedProjects = [];
+        this.configure();
+        this.renderContent();
+    }
+    configure() {
         projectState.addListener((projects) => {
             const relevantProjects = projects.filter((prj) => {
                 if (this.type === "active") {
@@ -126,8 +140,12 @@ class ProjectList extends Component {
             this.assignedProjects = relevantProjects;
             this.renderProjects();
         });
-        this.configure();
-        this.renderContent();
+    }
+    renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.element.querySelector("ul").id = listId;
+        this.element.querySelector("h2").textContent =
+            this.type.toUpperCase() + " PROJECTS";
     }
     renderProjects() {
         const listEl = document.getElementById(`${this.type}-projects-list`);
@@ -135,13 +153,6 @@ class ProjectList extends Component {
         for (const prjItem of this.assignedProjects) {
             new ProjectItem(this.element.querySelector("ul").id, prjItem);
         }
-    }
-    configure() { }
-    renderContent() {
-        const listId = `${this.type}-projects-list`;
-        this.element.querySelector("ul").id = listId;
-        this.element.querySelector("h2").textContent =
-            this.type.toUpperCase() + "PROJECTS";
     }
 }
 class ProjectInput extends Component {
@@ -152,6 +163,10 @@ class ProjectInput extends Component {
         this.peopleInputElement = this.element.querySelector("#people");
         this.configure();
     }
+    configure() {
+        this.element.addEventListener("submit", this.submitHandler);
+    }
+    renderContent() { }
     getUserInput() {
         const enteredTitle = this.titleInputElement.value;
         const enteredDescription = this.descriptionInputElement.value;
@@ -195,13 +210,9 @@ class ProjectInput extends Component {
             this.clearInputs();
         }
     }
-    configure() {
-        this.element.addEventListener("submit", this.submitHandler);
-    }
-    renderContent() { }
 }
 __decorate([
-    Autobind
+    autobind
 ], ProjectInput.prototype, "submitHandler", null);
 const prjInput = new ProjectInput();
 const activePrjList = new ProjectList("active");

@@ -102,12 +102,8 @@ function validate(validatableInput: Validatable) {
   return isValid;
 }
 
-// Autobind Decorator
-function Autobind(
-  _target: any,
-  _methodName: string,
-  descriptor: PropertyDescriptor
-) {
+// autobind decorator
+function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value;
   const adjDescriptor: PropertyDescriptor = {
     configurable: true,
@@ -164,18 +160,27 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
   private project: Project;
 
+  get persons() {
+    if (this.project.people === 1) {
+      return "1 person";
+    } else {
+      return `${this.project.people} persons`;
+    }
+  }
+
   constructor(hostId: string, project: Project) {
     super("single-project", hostId, false, project.id);
     this.project = project;
+
+    this.configure();
+    this.renderContent();
   }
 
   configure() {}
 
   renderContent() {
     this.element.querySelector("h2")!.textContent = this.project.title;
-    this.element.querySelector(
-      "h3"
-    )!.textContent = `Project contains ${this.project.people.toString()} people`;
+    this.element.querySelector("h3")!.textContent = this.persons + " assigned";
     this.element.querySelector("p")!.textContent = this.project.description;
   }
 }
@@ -188,6 +193,11 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
     super("project-list", "app", false, `${type}-projects`);
     this.assignedProjects = [];
 
+    this.configure();
+    this.renderContent();
+  }
+
+  configure() {
     projectState.addListener((projects: Project[]) => {
       const relevantProjects = projects.filter((prj) => {
         if (this.type === "active") {
@@ -198,9 +208,13 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
       this.assignedProjects = relevantProjects;
       this.renderProjects();
     });
+  }
 
-    this.configure();
-    this.renderContent();
+  renderContent() {
+    const listId = `${this.type}-projects-list`;
+    this.element.querySelector("ul")!.id = listId;
+    this.element.querySelector("h2")!.textContent =
+      this.type.toUpperCase() + " PROJECTS";
   }
 
   private renderProjects() {
@@ -212,15 +226,6 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
       new ProjectItem(this.element.querySelector("ul")!.id, prjItem);
     }
   }
-
-  configure() {}
-
-  renderContent() {
-    const listId = `${this.type}-projects-list`;
-    this.element.querySelector("ul")!.id = listId;
-    this.element.querySelector("h2")!.textContent =
-      this.type.toUpperCase() + "PROJECTS";
-  }
 }
 
 // Class to handle project input
@@ -231,7 +236,6 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
 
   constructor() {
     super("project-input", "app", true, "user-input");
-
     this.titleInputElement = this.element.querySelector(
       "#title"
     ) as HTMLInputElement;
@@ -241,9 +245,14 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     this.peopleInputElement = this.element.querySelector(
       "#people"
     ) as HTMLInputElement;
-
     this.configure();
   }
+
+  configure() {
+    this.element.addEventListener("submit", this.submitHandler);
+  }
+
+  renderContent() {}
 
   private getUserInput(): [string, string, number] | void {
     const enteredTitle = this.titleInputElement.value;
@@ -254,13 +263,11 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
       value: enteredTitle,
       required: true,
     };
-
     const descriptionValidatable: Validatable = {
       value: enteredDescription,
       required: true,
       minLength: 5,
     };
-
     const peopleValidatable: Validatable = {
       value: +enteredPeople,
       required: true,
@@ -286,7 +293,7 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     this.peopleInputElement.value = "";
   }
 
-  @Autobind
+  @autobind
   private submitHandler(event: Event) {
     event.preventDefault();
     const userInput = this.getUserInput();
@@ -296,15 +303,8 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
       this.clearInputs();
     }
   }
-
-  configure() {
-    this.element.addEventListener("submit", this.submitHandler);
-  }
-
-  renderContent() {}
 }
 
 const prjInput = new ProjectInput();
-
 const activePrjList = new ProjectList("active");
 const finishedPrjList = new ProjectList("finished");
