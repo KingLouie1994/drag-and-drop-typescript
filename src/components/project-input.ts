@@ -1,7 +1,7 @@
-import Cmp from "./base-component.js";
-import * as Validation from "../util/validation.js";
-import { Autobind as autobind } from "../decorators/autobind.js";
-import { projectState } from "../state/project-state.js";
+import Cmp from "./base-component";
+import * as Validation from "../util/validation";
+import { Autobind as autobind } from "../decorators/autobind";
+import { projectState } from "../state/project-state";
 
 // Class to handle project input
 export class ProjectInput extends Cmp<HTMLDivElement, HTMLFormElement> {
