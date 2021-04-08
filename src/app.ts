@@ -5,4 +5,4 @@ new ProjectInput();
 new ProjectList("active");
 new ProjectList("finished");
 
-console.log("LUL!");
+console.log("Seettt!");
