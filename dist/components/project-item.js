@@ -4,8 +4,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Component } from "./base-component";
-import { Autobind } from "../decorators/autobind";
+import Component from "./base-component.js";
+import { Autobind } from "../decorators/autobind.js";
 export class ProjectItem extends Component {
     constructor(hostId, project) {
         super("single-project", hostId, false, project.id);
